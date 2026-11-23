@@ -3,11 +3,14 @@
   "short_name": "Reportes",
   "description": "Práctica 6.3 de PWA: geolocalización modular, consentimiento previo y diagnóstico de precisión.",
   "lang": "es",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f6f8",
   "theme_color": "#ffffff",
+  "categories": ["education", "utilities"],
   "author": {
     "name": "Juan Jose Diaz Barroso"
   },

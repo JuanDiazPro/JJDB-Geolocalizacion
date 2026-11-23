@@ -1,9 +1,10 @@
 /* =========================================================================
-   sw.js — Service Worker del Laboratorio 6.3
-   Precarga el App Shell, incluido ./geo-helper.js.
+   sw.js — Service Worker de GeoConsciente
+   Tema 6.3 · PWA · Juan Jose Diaz Barroso
+   Precachea el App Shell (incluye ./geo-helper.js) y sirve offline.
    ========================================================================= */
 
-var CACHE_VERSION = 'geoconsciente-v4';
+var CACHE_VERSION = 'geoconsciente-v3';
 var APP_SHELL = [
   './',
   './index.html',
@@ -18,6 +19,7 @@ var APP_SHELL = [
   './icons/apple-touch-icon.png'
 ];
 
+/* Instalación: guarda el App Shell completo, geo-helper.js incluido. */
 self.addEventListener('install', function (evento) {
   evento.waitUntil(
     caches
@@ -31,6 +33,7 @@ self.addEventListener('install', function (evento) {
   );
 });
 
+/* Activación: elimina versiones anteriores del caché. */
 self.addEventListener('activate', function (evento) {
   evento.waitUntil(
     caches
@@ -51,6 +54,9 @@ self.addEventListener('activate', function (evento) {
   );
 });
 
+/* Estrategia:
+   - Navegación: red primero, con respaldo en index.html cacheado.
+   - Recursos: caché primero, y se actualiza en segundo plano. */
 self.addEventListener('fetch', function (evento) {
   var peticion = evento.request;
 
