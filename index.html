@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoConsciente · Ubicación con consentimiento | Juan Jose Diaz Barroso</title>
+  <meta name="description" content="PWA del laboratorio 6.3: geolocalización modular, pre-permiso ético y diagnóstico de precisión. JavaScript Vanilla.">
+  <meta name="author" content="Juan Jose Diaz Barroso">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="GeoConsciente">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"></path>
+          <circle cx="12" cy="10" r="2.6"></circle>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">GeoConsciente</span>
+        <span class="brand-sub">PWA · Laboratorio 6.3</span>
+      </span>
+    </a>
+
+    <div class="header-right">
+      <span class="author-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+        </svg>
+        Juan Jose Diaz Barroso
+      </span>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- HERO -----------------------------------------------------------------
+    -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Tema 6.3 · Geolocalización reutilizable</p>
+        <h1 id="hero-title">Tu ubicación,<br><span>solo si tú quieres.</span></h1>
+        <p class="hero-lead">
+          Esta PWA pide permiso con contexto antes de tocar el GPS, mide el margen real de error
+          y siempre ofrece un plan B manual. Sin librerías, con promesas nativas.
+        </p>
+        <ul class="hero-pills">
+          <li><span aria-hidden="true">🛡️</span> Pre-permiso ético</li>
+          <li><span aria-hidden="true">📐</span> Diagnóstico accuracy</li>
+          <li><span aria-hidden="true">🧭</span> Plan B manual</li>
+        </ul>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="radar">
+          <span class="radar-ring ring-1"></span>
+          <span class="radar-ring ring-2"></span>
+          <span class="radar-ring ring-3"></span>
+          <span class="radar-sweep"></span>
+          <span class="radar-point"></span>
+        </div>
+        <p class="hero-art-caption"><span class="dot-live"></span> <span id="hero-estado">Esperando tu decisión</span></p>
+      </div>
+    </section>
+
+    <!-- CUERPO ---------------------------------------------------------------
+    -->
+    <div class="grid">
+
+      <!-- COLUMNA PRINCIPAL --------------------------------------------------
+      -->
+      <div class="column-main">
+
+        <section class="card" id="card-solicitud" aria-labelledby="solicitud-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Paso 1</p>
+              <h2 id="solicitud-title">Solicita tu ubicación</h2>
+            </div>
+            <span class="permiso-chip" id="chip-permiso" data-estado="desconocido">
+              <span class="chip-dot" aria-hidden="true"></span>
+              <span id="chip-permiso-texto">Consultando permiso…</span>
+            </span>
+          </div>
+
+          <p class="card-sub">
+            Adjuntaremos las coordenadas a un reporte técnico. Puedes revocar el permiso
+            en cualquier momento desde tu navegador.
+          </p>
+
+          <div class="acciones-principales">
+            <button type="button" class="btn btn-primary" id="btn-solicitar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"></path>
+                <circle cx="12" cy="10" r="2.5"></circle>
+              </svg>
+              <span class="btn-label">Adjuntar mi ubicación</span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="btn-lectura-rapida" title="Lectura de baja precisión, ideal para laptops sin GPS">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10H13l0-8Z"></path>
+              </svg>
+              Lectura rápida (Wi-Fi)
+            </button>
+          </div>
+
+          <!-- PRE-PERMISO -->
+          <div class="prepermiso" id="zona-prepermiso" hidden>
+            <div class="prepermiso-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3 4 6.5v5.2c0 4.6 3.4 8.1 8 9.3 4.6-1.2 8-4.7 8-9.3V6.5L12 3Z"></path>
+                <path d="m9 12 2 2 4-4.5"></path>
+              </svg>
+            </div>
+            <div class="prepermiso-body">
+              <h3>¿Nos compartes tu ubicación?</h3>
+              <p>
+                La usamos <strong>una sola vez</strong> para adjuntar las coordenadas al reporte
+                y ubicar la sucursal más cercana. No rastreamos tus movimientos ni guardamos
+                el dato en un servidor.
+              </p>
+              <ul class="mini-list">
+                <li>Lectura puntual, sin seguimiento continuo.</li>
+                <li>El navegador te mostrará su propio diálogo nativo.</li>
+                <li>Si dices que no, puedes elegir tu zona manualmente.</li>
+              </ul>
+              <div class="prepermiso-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-confirmar-ubicacion">
+                  Sí, compartir mi ubicación
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-prefiero-manual">
+                  Prefiero elegir mi zona
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ERROR -->
+          <div class="alert" id="error-banner" role="alert" hidden>
+            <span class="alert-icon" aria-hidden="true">!</span>
+            <div class="alert-body">
+              <strong id="error-titulo">No pudimos obtener tu ubicación</strong>
+              <p id="error-texto"></p>
+              <div class="alert-actions">
+                <button type="button" class="btn btn-mini" id="btn-error-manual">Usar zona manual</button>
+                <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-error-reintentar">Reintentar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESULTADO -->
+          <article class="resultado" id="resultado" hidden aria-live="polite">
+            <div class="resultado-top">
+              <div class="resultado-pin" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"></path>
+                  <circle cx="12" cy="10" r="2.5"></circle>
+                </svg>
+              </div>
+              <div>
+                <p class="resultado-kicker">Coordenadas obtenidas</p>
+                <p class="resultado-coords" id="resultado-coords">—</p>
+              </div>
+              <span class="badge-calidad" id="badge-calidad" data-nivel="aproximada">—</span>
+            </div>
+
+            <div class="precision-panel">
+              <div class="precision-head">
+                <span>Margen de error reportado</span>
+                <strong id="resultado-precision">—</strong>
+              </div>
+              <div class="precision-track">
+                <span class="precision-fill" id="barra-precision"></span>
+                <span class="precision-marks" aria-hidden="true">
+                  <i>0 m</i><i>150 m</i><i>300 m +</i>
+                </span>
+              </div>
+              <p class="precision-note" id="resultado-nota">—</p>
+            </div>
+
+            <dl class="resultado-meta">
+              <div>
+                <dt>Fuente</dt>
+                <dd id="resultado-fuente">Navegador</dd>
+              </div>
+              <div>
+                <dt>Hora de fijación</dt>
+                <dd id="resultado-hora">—</dd>
+              </div>
+              <div>
+                <dt>Altitud</dt>
+                <dd id="resultado-altitud">—</dd>
+              </div>
+            </dl>
+
+            <div class="resultado-footer">
+              <a class="link-externo" id="resultado-enlace" href="#" target="_blank" rel="noopener noreferrer">
+                Ver zona aproximada en OpenStreetMap
+                <span aria-hidden="true">↗</span>
+              </a>
+              <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-repetir-lectura">Volver a medir</button>
+            </div>
+          </article>
+
+          <!-- SELECTOR MANUAL (PLAN B) -->
+          <form class="selector-manual" id="selector-manual" hidden>
+            <div class="selector-head">
+              <span class="selector-icon" aria-hidden="true">🧭</span>
+              <div>
+                <h3>Plan B · Elige tu zona manualmente</h3>
+                <p id="selector-motivo">No necesitas GPS para completar el reporte.</p>
+              </div>
+            </div>
+            <div class="campo">
+              <label for="select-zona">Zona o ciudad</label>
+              <select id="select-zona" name="zona" required>
+                <option value="">Selecciona una zona…</option>
+                <option value="Zona Norte">Zona Norte</option>
+                <option value="Zona Sur">Zona Sur</option>
+                <option value="Zona Centro">Zona Centro</option>
+                <option value="Zona Oriente">Zona Oriente</option>
+                <option value="Zona Occidente">Zona Occidente</option>
+                <option value="Otra ciudad / zona">Otra ciudad / zona</option>
+              </select>
+            </div>
+            <div class="campo" id="campo-otra-zona" hidden>
+              <label for="input-otra-zona">Escribe tu ciudad o zona</label>
+              <input type="text" id="input-otra-zona" maxlength="60" placeholder="Ej.: Barrio La Esperanza, Cali">
+            </div>
+            <div class="campo">
+              <label for="input-referencia">Referencia (opcional)</label>
+              <input type="text" id="input-referencia" maxlength="90" placeholder="Ej.: frente al parque principal">
+            </div>
+            <div class="selector-actions">
+              <button type="submit" class="btn btn-primary btn-sm">Guardar zona manual</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-cancelar-zona">Cancelar</button>
+            </div>
+            <p class="selector-hint" id="selector-hint"></p>
+          </form>
+
+          <!-- RESUMEN PARA EL REPORTE -->
+          <div class="reporte-ubicacion" id="resumen-ubicacion" data-estado="pendiente">
+            <div class="resumen-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 4h6l1 2h4v14H4V6h4l1-2Z"></path>
+                <path d="m9 13 2 2 4-4"></path>
+              </svg>
+            </div>
+            <div class="resumen-body">
+              <p class="resumen-label">Ubicación adjunta al reporte</p>
+              <p class="resumen-valor" id="resumen-valor">Todavía no has adjuntado una ubicación.</p>
+            </div>
+            <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-quitar-ubicacion" hidden>Quitar</button>
+          </div>
+        </section>
+
+        <!-- FORMULARIO DE REPORTE -->
+        <section class="card" aria-labelledby="reporte-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Paso 2</p>
+              <h2 id="reporte-title">Redacta el reporte</h2>
+            </div>
+          </div>
+          <form id="form-reporte" novalidate>
+            <div class="campo">
+              <label for="input-descripcion">¿Qué ocurrió?</label>
+              <textarea id="input-descripcion" rows="3" maxlength="280" placeholder="Ej.: El lector de tarjetas de la sucursal no responde desde ayer."></textarea>
+            </div>
+            <div class="reporte-footer">
+              <p class="reporte-hint" id="reporte-hint">Describe la incidencia y adjunta una ubicación para enviar.</p>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-enviar-reporte">Enviar reporte</button>
+            </div>
+          </form>
+          <ul class="lista-reportes" id="lista-reportes" aria-live="polite"></ul>
+        </section>
+
+        <!-- BITÁCORA -->
+        <section class="card" aria-labelledby="log-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Depuración</p>
+              <h2 id="log-title">Registro de actividad</h2>
+            </div>
+            <span class="contador" id="log-contador">0 eventos</span>
+          </div>
+          <ol class="log" id="log">
+            <li class="log-vacio">Aún no hay eventos. Pulsa «Adjuntar mi ubicación» para comenzar.</li>
+          </ol>
+        </section>
+      </div>
+
+      <!-- COLUMNA LATERAL ----------------------------------------------------
+      -->
+      <aside class="column-side">
+
+        <section class="card card-compact" aria-labelledby="device-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Contexto</p>
+              <h2 id="device-title">Tu dispositivo</h2>
+            </div>
+          </div>
+          <dl class="ficha">
+            <div>
+              <dt>Plataforma</dt>
+              <dd id="device-plataforma">Detectando…</dd>
+            </div>
+            <div>
+              <dt>Fuente de ubicación</dt>
+              <dd id="device-fuente">—</dd>
+            </div>
+            <div>
+              <dt>HTTPS</dt>
+              <dd><span class="tag" id="device-https">—</span></dd>
+            </div>
+            <div>
+              <dt>Geolocation API</dt>
+              <dd><span class="tag" id="device-soporte">—</span></dd>
+            </div>
+            <div>
+              <dt>Permissions API</dt>
+              <dd><span class="tag" id="device-permissions">—</span></dd>
+            </div>
+            <div>
+              <dt>Service Worker</dt>
+              <dd><span class="tag" id="device-sw">—</span></dd>
+            </div>
+          </dl>
+          <p class="nota-plataforma" id="nota-plataforma"></p>
+        </section>
+
+        <section class="card card-compact" aria-labelledby="rapida-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Reutilización</p>
+              <h2 id="rapida-title">Lectura rápida</h2>
+            </div>
+          </div>
+          <p class="card-sub small">
+            El mismo helper con <code>enableHighAccuracy: false</code>. Ideal para laptops
+            que dependen de Wi-Fi o IP.
+          </p>
+          <div class="lectura-rapida-vacia" id="rapida-vacia">
+            Sin lecturas todavía. Usa el botón «Lectura rápida» de la tarjeta principal.
+          </div>
+          <div class="lectura-rapida" id="rapida-resultado" hidden>
+            <div class="rapida-top">
+              <span class="rapida-coords" id="rapida-coords">—</span>
+              <span class="mini-badge" id="rapida-badge">—</span>
+            </div>
+            <p class="rapida-meta" id="rapida-meta"></p>
+          </div>
+        </section>
+
+        <section class="card card-compact guia" aria-labelledby="guia-title">
+          <div class="card-head">
+            <div>
+              <p class="step-label">Producción</p>
+              <h2 id="guia-title">Reglas por plataforma</h2>
+            </div>
+          </div>
+          <ul class="guia-lista">
+            <li>
+              <span class="guia-ico" aria-hidden="true">🍎</span>
+              <div><strong>iOS / Safari</strong><p>Exige un clic directo. La PWA instalada tiene permisos aislados de Safari.</p></div>
+            </li>
+            <li>
+              <span class="guia-ico" aria-hidden="true">🤖</span>
+              <div><strong>Android / Chrome</strong><p>Permite precisión o aproximada. Comparte permisos con la PWA.</p></div>
+            </li>
+            <li>
+              <span class="guia-ico" aria-hidden="true">💻</span>
+              <div><strong>Laptop sin GPS</strong><p><code>enableHighAccuracy: true</code> no crea satélites: puede terminar en TIMEOUT.</p></div>
+            </li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="site-footer">
+      <div>
+        <p class="footer-name">Juan Jose Diaz Barroso</p>
+        <p class="footer-role">Desarrollo de Aplicaciones Web Progresivas · Tema 6.3</p>
+      </div>
+      <p class="footer-tech">Vanilla JS · Promesas · GitHub Pages</p>
+    </footer>
+  </main>
+
+  <!-- Orden obligatorio: el helper primero, la lógica de UI después. -->
+  <script src="./geo-helper.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
