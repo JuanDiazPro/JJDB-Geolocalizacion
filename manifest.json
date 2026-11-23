@@ -1,15 +1,15 @@
 {
-  "name": "GeoConsciente · Ubicación con consentimiento",
-  "short_name": "GeoConsciente",
-  "description": "PWA del laboratorio 6.3: geolocalización modular, pre-permiso ético y diagnóstico de precisión en JavaScript Vanilla.",
+  "name": "Reporte con ubicación",
+  "short_name": "Reportes",
+  "description": "Práctica 6.3 de PWA: geolocalización modular, consentimiento previo y diagnóstico de precisión.",
   "lang": "es",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#eef4f2",
-  "theme_color": "#0f766e",
+  "background_color": "#f5f6f8",
+  "theme_color": "#ffffff",
   "categories": ["education", "utilities"],
   "author": {
     "name": "Juan Jose Diaz Barroso"

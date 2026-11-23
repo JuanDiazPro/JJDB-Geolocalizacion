@@ -236,7 +236,7 @@
       el.resultado.hidden = true;
       el.rapidaResultado.hidden = true;
       el.rapidaVacia.hidden = false;
-      el.heroEstado.textContent = 'Esperando tu decisión';
+      el.heroEstado.textContent = 'Sin ubicación adjunta';
       registrar('Ubicación quitada del reporte.', 'info');
     });
 
@@ -322,13 +322,13 @@
     }
 
     if (permiso === 'denied') {
-      el.heroEstado.textContent = 'Permiso bloqueado · plan B disponible';
+      el.heroEstado.textContent = 'Permiso bloqueado: usa una zona manual';
     } else if (permiso === 'granted') {
-      el.heroEstado.textContent = 'Permiso concedido · listo para medir';
+      el.heroEstado.textContent = 'Permiso concedido';
     } else if (estado.ubicacion) {
       el.heroEstado.textContent = 'Ubicación adjunta al reporte';
     } else {
-      el.heroEstado.textContent = 'Esperando tu decisión';
+      el.heroEstado.textContent = 'Sin ubicación adjunta';
     }
   }
 
@@ -439,11 +439,11 @@
 
   function actualizarHeroTrasError(perfil) {
     if (estado.permiso === 'denied') {
-      el.heroEstado.textContent = 'Permiso bloqueado · plan B disponible';
+      el.heroEstado.textContent = 'Permiso bloqueado: usa una zona manual';
     } else if (perfil === 'rapida') {
-      el.heroEstado.textContent = 'Lectura aproximada fallida';
+      el.heroEstado.textContent = 'Lectura aproximada no disponible';
     } else {
-      el.heroEstado.textContent = 'Sin coordenadas · plan B disponible';
+      el.heroEstado.textContent = 'Sin coordenadas: usa una zona manual';
     }
   }
 
@@ -502,7 +502,7 @@
 
     actualizarResumen();
     actualizarEstadoPermiso(estado.permiso);
-    el.heroEstado.textContent = 'Ubicación lista · ' + Geo.formatearPrecision(ubicacion.precisionMetros);
+    el.heroEstado.textContent = 'Ubicación obtenida: ' + Geo.formatearPrecision(ubicacion.precisionMetros);
   }
 
   function renderizarLecturaRapida(ubicacion) {

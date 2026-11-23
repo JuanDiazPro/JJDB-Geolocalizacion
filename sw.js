@@ -4,7 +4,7 @@
    Precachea el App Shell (incluye ./geo-helper.js) y sirve offline.
    ========================================================================= */
 
-var CACHE_VERSION = 'geoconsciente-v2';
+var CACHE_VERSION = 'geoconsciente-v3';
 var APP_SHELL = [
   './',
   './index.html',
