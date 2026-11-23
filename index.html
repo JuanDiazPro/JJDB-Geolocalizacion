@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reporte con ubicación | Laboratorio 6.3</title>
+  <title>Geolocalización · Laboratorio 6.3</title>
   <meta name="description" content="Práctica 6.3 de PWA: geolocalización modular, consentimiento previo y diagnóstico de precisión.">
   <meta name="author" content="Juan Jose Diaz Barroso">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Reporte con ubicación">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
@@ -19,303 +18,79 @@
 
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand">
-        <span class="brand-name">Laboratorio 6.3</span>
-        <span class="brand-sub">Desarrollo de Aplicaciones Web Progresivas</span>
+      <div>
+        <p class="brand">Laboratorio 6.3 · Geolocalización</p>
+        <p class="brand-sub">Desarrollo de Aplicaciones Web Progresivas</p>
       </div>
       <p class="author">Juan Jose Diaz Barroso</p>
     </div>
   </header>
 
   <main class="layout">
+    <h1>Reporte con ubicación</h1>
+    <p class="intro">
+      Solicita tu ubicación para adjuntarla al reporte. Si no puedes compartirla, selecciona
+      una zona manualmente.
+    </p>
 
-    <section class="intro" aria-labelledby="intro-title">
-      <h1 id="intro-title">Reporte de incidencias con ubicación</h1>
-      <p>
-        La aplicación solicita la ubicación únicamente cuando el usuario lo decide, adjunta las
-        coordenadas al reporte y muestra el margen de error de la lectura. Si el permiso se
-        deniega o la ubicación no está disponible, se puede seleccionar una zona manualmente.
-      </p>
-      <p class="estado-sesion">Estado: <span id="hero-estado">Sin ubicación adjunta</span></p>
-    </section>
+    <section class="card" aria-labelledby="ubicacion-title">
+      <h2 id="ubicacion-title">Ubicación del reporte</h2>
 
-    <div class="grid">
+      <button type="button" class="btn btn-principal" id="btn-solicitar">Adjuntar mi ubicación</button>
 
-      <div class="column-main">
-
-        <section class="card" id="card-solicitud" aria-labelledby="solicitud-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Paso 1</p>
-              <h2 id="solicitud-title">Solicitar ubicación</h2>
-            </div>
-            <span class="permiso-chip" id="chip-permiso" data-estado="desconocido">
-              <span class="chip-dot" aria-hidden="true"></span>
-              <span id="chip-permiso-texto">Consultando permiso…</span>
-            </span>
-          </div>
-
-          <p class="card-sub">
-            Las coordenadas se usan para completar el reporte técnico. Puedes revocar el permiso
-            desde la configuración del navegador en cualquier momento.
-          </p>
-
-          <div class="acciones-principales">
-            <button type="button" class="btn btn-primary" id="btn-solicitar">
-              <span class="btn-label">Adjuntar mi ubicación</span>
-            </button>
-            <button type="button" class="btn btn-ghost" id="btn-lectura-rapida">
-              Lectura rápida por Wi-Fi
-            </button>
-          </div>
-
-          <div class="prepermiso" id="zona-prepermiso" hidden>
-            <div class="prepermiso-body">
-              <h3>Permiso de ubicación</h3>
-              <p>
-                Usaremos tu ubicación <strong>una sola vez</strong> para adjuntar las coordenadas
-                al reporte y localizar la sucursal más cercana. No se hace seguimiento continuo
-                ni se envían los datos a un servidor.
-              </p>
-              <ul class="mini-list">
-                <li>Lectura puntual, sin seguimiento.</li>
-                <li>El navegador mostrará su propio diálogo de permiso.</li>
-                <li>Si no deseas compartirla, puedes elegir una zona manualmente.</li>
-              </ul>
-              <div class="prepermiso-actions">
-                <button type="button" class="btn btn-primary btn-sm" id="btn-confirmar-ubicacion">
-                  Compartir mi ubicación
-                </button>
-                <button type="button" class="btn btn-ghost btn-sm" id="btn-prefiero-manual">
-                  Elegir zona manual
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="alert" id="error-banner" role="alert" hidden>
-            <div class="alert-body">
-              <strong id="error-titulo">No fue posible obtener la ubicación</strong>
-              <p id="error-texto"></p>
-              <div class="alert-actions">
-                <button type="button" class="btn btn-mini" id="btn-error-manual">Usar zona manual</button>
-                <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-error-reintentar">Reintentar</button>
-              </div>
-            </div>
-          </div>
-
-          <article class="resultado" id="resultado" hidden aria-live="polite">
-            <div class="resultado-top">
-              <div>
-                <p class="resultado-kicker">Coordenadas obtenidas</p>
-                <p class="resultado-coords" id="resultado-coords">—</p>
-              </div>
-              <span class="badge-calidad" id="badge-calidad" data-nivel="aproximada">—</span>
-            </div>
-
-            <div class="precision-panel">
-              <div class="precision-head">
-                <span>Margen de error reportado</span>
-                <strong id="resultado-precision">—</strong>
-              </div>
-              <div class="precision-track">
-                <span class="precision-fill" id="barra-precision"></span>
-                <span class="precision-marks" aria-hidden="true">
-                  <i>0 m</i><i>150 m</i><i>300 m o más</i>
-                </span>
-              </div>
-              <p class="precision-note" id="resultado-nota">—</p>
-            </div>
-
-            <dl class="resultado-meta">
-              <div>
-                <dt>Fuente</dt>
-                <dd id="resultado-fuente">Navegador</dd>
-              </div>
-              <div>
-                <dt>Hora de la lectura</dt>
-                <dd id="resultado-hora">—</dd>
-              </div>
-              <div>
-                <dt>Altitud</dt>
-                <dd id="resultado-altitud">—</dd>
-              </div>
-            </dl>
-
-            <div class="resultado-footer">
-              <a class="link-externo" id="resultado-enlace" href="#" target="_blank" rel="noopener noreferrer">
-                Ver ubicación aproximada en OpenStreetMap
-              </a>
-              <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-repetir-lectura">Volver a medir</button>
-            </div>
-          </article>
-
-          <form class="selector-manual" id="selector-manual" hidden>
-            <div class="selector-head">
-              <h3>Selección manual de zona</h3>
-              <p id="selector-motivo">No necesitas GPS para completar el reporte.</p>
-            </div>
-            <div class="campo">
-              <label for="select-zona">Zona o ciudad</label>
-              <select id="select-zona" name="zona" required>
-                <option value="">Selecciona una zona…</option>
-                <option value="Zona Norte">Zona Norte</option>
-                <option value="Zona Sur">Zona Sur</option>
-                <option value="Zona Centro">Zona Centro</option>
-                <option value="Zona Oriente">Zona Oriente</option>
-                <option value="Zona Occidente">Zona Occidente</option>
-                <option value="Otra ciudad / zona">Otra ciudad / zona</option>
-              </select>
-            </div>
-            <div class="campo" id="campo-otra-zona" hidden>
-              <label for="input-otra-zona">Ciudad o zona</label>
-              <input type="text" id="input-otra-zona" maxlength="60" placeholder="Ej.: Barrio La Esperanza, Cali">
-            </div>
-            <div class="campo">
-              <label for="input-referencia">Referencia (opcional)</label>
-              <input type="text" id="input-referencia" maxlength="90" placeholder="Ej.: frente al parque principal">
-            </div>
-            <div class="selector-actions">
-              <button type="submit" class="btn btn-primary btn-sm">Guardar zona manual</button>
-              <button type="button" class="btn btn-ghost btn-sm" id="btn-cancelar-zona">Cancelar</button>
-            </div>
-            <p class="selector-hint" id="selector-hint"></p>
-          </form>
-
-          <div class="reporte-ubicacion" id="resumen-ubicacion" data-estado="pendiente">
-            <div class="resumen-body">
-              <p class="resumen-label">Ubicación adjunta al reporte</p>
-              <p class="resumen-valor" id="resumen-valor">Todavía no has adjuntado una ubicación.</p>
-            </div>
-            <button type="button" class="btn btn-mini btn-mini-ghost" id="btn-quitar-ubicacion" hidden>Quitar</button>
-          </div>
-        </section>
-
-        <section class="card" aria-labelledby="reporte-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Paso 2</p>
-              <h2 id="reporte-title">Descripción del reporte</h2>
-            </div>
-          </div>
-          <form id="form-reporte" novalidate>
-            <div class="campo">
-              <label for="input-descripcion">¿Qué ocurrió?</label>
-              <textarea id="input-descripcion" rows="3" maxlength="280" placeholder="Ej.: El lector de tarjetas de la sucursal no responde desde ayer."></textarea>
-            </div>
-            <div class="reporte-footer">
-              <p class="reporte-hint" id="reporte-hint">Describe la incidencia y adjunta una ubicación para enviar.</p>
-              <button type="submit" class="btn btn-primary btn-sm" id="btn-enviar-reporte">Enviar reporte</button>
-            </div>
-          </form>
-          <ul class="lista-reportes" id="lista-reportes" aria-live="polite"></ul>
-        </section>
-
-        <section class="card" aria-labelledby="log-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Registro</p>
-              <h2 id="log-title">Actividad de la sesión</h2>
-            </div>
-            <span class="contador" id="log-contador">0 eventos</span>
-          </div>
-          <ol class="log" id="log">
-            <li class="log-vacio">Aún no hay eventos. Pulsa «Adjuntar mi ubicación» para comenzar.</li>
-          </ol>
-        </section>
+      <div class="prepermiso" id="zona-prepermiso" hidden>
+        <h3>Permiso de ubicación</h3>
+        <p>
+          La ubicación se usará una sola vez para adjuntar las coordenadas al reporte.
+          El navegador mostrará su propio diálogo de permiso.
+        </p>
+        <div class="acciones">
+          <button type="button" class="btn btn-principal" id="btn-confirmar-ubicacion">Compartir ubicación</button>
+          <button type="button" class="btn btn-secundario" id="btn-prefiero-manual">Elegir zona manualmente</button>
+        </div>
       </div>
 
-      <aside class="column-side">
+      <p class="mensaje" id="mensaje" role="status" hidden></p>
 
-        <section class="card card-compact" aria-labelledby="device-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Entorno</p>
-              <h2 id="device-title">Dispositivo</h2>
-            </div>
-          </div>
-          <dl class="ficha">
-            <div>
-              <dt>Plataforma</dt>
-              <dd id="device-plataforma">Detectando…</dd>
-            </div>
-            <div>
-              <dt>Fuente de ubicación</dt>
-              <dd id="device-fuente">—</dd>
-            </div>
-            <div>
-              <dt>HTTPS</dt>
-              <dd><span class="tag" id="device-https">—</span></dd>
-            </div>
-            <div>
-              <dt>Geolocation API</dt>
-              <dd><span class="tag" id="device-soporte">—</span></dd>
-            </div>
-            <div>
-              <dt>Permissions API</dt>
-              <dd><span class="tag" id="device-permissions">—</span></dd>
-            </div>
-            <div>
-              <dt>Service Worker</dt>
-              <dd><span class="tag" id="device-sw">—</span></dd>
-            </div>
-          </dl>
-          <p class="nota-plataforma" id="nota-plataforma"></p>
-        </section>
+      <div class="resultado" id="resultado" hidden aria-live="polite">
+        <p class="resultado-titulo">Ubicación obtenida</p>
+        <p class="dato">
+          <span>Coordenadas</span>
+          <strong id="resultado-coords">—</strong>
+        </p>
+        <p class="dato">
+          <span>Precisión</span>
+          <strong id="resultado-precision">—</strong>
+          <span class="etiqueta" id="badge-calidad">—</span>
+        </p>
+        <p class="resultado-nota" id="resultado-nota"></p>
+      </div>
 
-        <section class="card card-compact" aria-labelledby="rapida-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Reutilización</p>
-              <h2 id="rapida-title">Lectura rápida</h2>
-            </div>
-          </div>
-          <p class="card-sub small">
-            Usa el mismo módulo con <code>enableHighAccuracy: false</code>, pensado para equipos
-            que dependen de Wi-Fi o de la dirección IP.
-          </p>
-          <div class="lectura-rapida-vacia" id="rapida-vacia">
-            Sin lecturas todavía. Usa el botón «Lectura rápida por Wi-Fi».
-          </div>
-          <div class="lectura-rapida" id="rapida-resultado" hidden>
-            <div class="rapida-top">
-              <span class="rapida-coords" id="rapida-coords">—</span>
-              <span class="mini-badge" id="rapida-badge">—</span>
-            </div>
-            <p class="rapida-meta" id="rapida-meta"></p>
-          </div>
-        </section>
+      <form class="selector-manual" id="selector-manual" hidden>
+        <h3>Selección manual de zona</h3>
+        <p class="selector-motivo" id="selector-motivo"></p>
+        <div class="campo">
+          <label for="select-zona">Zona o ciudad</label>
+          <select id="select-zona" required>
+            <option value="">Selecciona una zona…</option>
+            <option value="Zona Norte">Zona Norte</option>
+            <option value="Zona Sur">Zona Sur</option>
+            <option value="Zona Centro">Zona Centro</option>
+            <option value="Zona Oriente">Zona Oriente</option>
+            <option value="Zona Occidente">Zona Occidente</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-principal">Guardar zona</button>
+        <p class="selector-hint" id="selector-hint"></p>
+      </form>
 
-        <section class="card card-compact" aria-labelledby="guia-title">
-          <div class="card-head">
-            <div>
-              <p class="step-label">Referencia</p>
-              <h2 id="guia-title">Comportamiento por plataforma</h2>
-            </div>
-          </div>
-          <ul class="guia-lista">
-            <li>
-              <strong>iOS / Safari</strong>
-              <p>Requiere un clic directo del usuario. La PWA instalada mantiene permisos separados de Safari.</p>
-            </li>
-            <li>
-              <strong>Android / Chrome</strong>
-              <p>Permite ubicación precisa o aproximada y comparte los permisos con la PWA.</p>
-            </li>
-            <li>
-              <strong>Portátil sin GPS</strong>
-              <p>La lectura depende de Wi-Fi o IP. <code>enableHighAccuracy: true</code> puede terminar en TIMEOUT.</p>
-            </li>
-          </ul>
-        </section>
-      </aside>
-    </div>
-
-    <footer class="site-footer">
-      <p>Juan Jose Diaz Barroso · Desarrollo de Aplicaciones Web Progresivas</p>
-      <p>JavaScript Vanilla · GitHub Pages</p>
-    </footer>
+      <p class="zona-guardada" id="zona-guardada" hidden></p>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    Juan Jose Diaz Barroso · Laboratorio 6.3
+  </footer>
 
   <script src="./geo-helper.js"></script>
   <script src="./app.js"></script>
